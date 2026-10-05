@@ -1,0 +1,36 @@
+{
+  "release": "v20.0.1",
+  "scope": "Paris\u2013Osaka plus transitions, including 23 BPO transition cases; excludes standalone BPO fork suites",
+  "test_cases": 54438,
+  "workers": 4,
+  "dates": "2026-07-16 / 2026-07-17",
+  "method": "Suite wall-clock span: max(test end) minus min(test start). Includes fixture extraction and simulator/client startup; excludes Docker image builds.",
+  "comparison": "Same host, fixture release, case count, worker count, check-time limit, and client image within each pair. Daily runs, not repeated controlled benchmarks.",
+  "provenance": "Saved analysis of public Hive dashboard runs, captured 2026-07-19. Not freshly rerun.",
+  "clients": [
+    {
+      "name": "Geth",
+      "version": "v1.17.5-unstable-06b23b42-20260715",
+      "engine_seconds": 15746.2,
+      "enginex_seconds": 1163.1,
+      "engine_run": "1784203671-c67176b7e62a1502077e304d8454538a",
+      "enginex_run": "1784182809-1096f0df3f69adee6336930cc30e2c99"
+    },
+    {
+      "name": "Reth",
+      "version": "2.4.0+3ce0b4ec",
+      "engine_seconds": 16852.3,
+      "enginex_seconds": 1161.9,
+      "engine_run": "1784291294-28c2af6fc0b202559c994bb8ce4e64c7",
+      "enginex_run": "1784269825-73568bc8746416df916666b217ab63b0"
+    },
+    {
+      "name": "Nethermind",
+      "version": "1.40.0-unstable+b5a64c02",
+      "engine_seconds": 95171.4,
+      "enginex_seconds": 4544.1,
+      "engine_run": "1784283224-762e14dea8322ee8381afb7239df00b0",
+      "enginex_run": "1784186324-7cbbef9bee1ab295da5b970b8f84ce87"
+    }
+  ]
+}

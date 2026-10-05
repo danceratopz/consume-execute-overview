@@ -1,0 +1,23 @@
+{
+  "release": "v21.0.0",
+  "fork_filter": "Amsterdam",
+  "index_created_at": "2026-09-23T11:18:18.106729Z",
+  "index_root_hash": "0xad4a280a4e219bcf60fba3a9a62771b66d455ecae8940c70899cfe3b9ee453eb",
+  "index_path": "v21.0.0/fixtures/.meta/index.json",
+  "counts": {
+    "blockchain_test_engine": 26357,
+    "blockchain_test": 26314,
+    "blockchain_test_engine_x": 26357,
+    "state_test": 16896,
+    "transaction_test": 92,
+    "blockchain_test_sync": 9
+  },
+  "engine_x_pre_hash_groups": 996,
+  "groups_containing_ported_static": 512,
+  "engine_x_cases_per_group": 26.46285140562249,
+  "sync_all_forks": {
+    "Osaka": 9,
+    "Amsterdam": 9
+  },
+  "counting_method": "Count test_cases entries with fork exactly Amsterdam, grouped by format. Formats overlap. Count distinct pre_hash values for EngineX."
+}
