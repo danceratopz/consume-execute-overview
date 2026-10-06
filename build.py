@@ -57,7 +57,7 @@ def notes(body, sources=''):
 
 def section(id, number, title, intro, body, extra='', cmd=''):
     command = f'<code class="command">{escape(cmd)}</code>' if cmd else ''
-    return f'<section class="slide" id="{id}" data-title="{escape(title)}"><div class="inner"><div class="section-top"><span class="section-number">{number} / 10</span>{command}</div><h2>{title}</h2><p class="lead">{intro}</p>{body}{extra}</div></section>'
+    return f'<section class="slide" id="{id}" data-title="{escape(title)}"><div class="inner"><div class="section-top"><span class="section-number">{number} / 11</span>{command}</div><h2>{title}</h2><p class="lead">{intro}</p>{body}{extra}</div></section>'
 
 # Overview: each route names the actual client entry point.
 hero_diagram = svg('Consume delivers fixture data to an isolated client. Execute sends transactions into a network.',
@@ -70,7 +70,7 @@ hero_diagram = svg('Consume delivers fixture data to an isolated client. Execute
     + edge('M210 288 H270','mint')
     + box(282,246,300,85,'Network','EL peers + consensus','mint')
     + text(306,395,'Controlled fixtures. Native network interactions.','label'),420,620)
-cover = f'''<section class="slide cover" id="overview" data-title="Overview"><div class="inner"><div class="section-top"><span class="section-number">01 / 10</span><span class="edition">execution-specs</span><span class="crops-badge" title="Censorship resistance, Open source, Privacy, Security">CROPS</span></div><div class="hero"><div><h1>Execution client<br><span>test routes</span></h1><p class="hero-lead">A discussion map of <strong>consume</strong> and <strong>execute</strong>.</p><p class="hero-sub">Which interface? Which environment?<br>How much client reuse?</p><div class="hero-links"><a href="#routes" class="primary-link">Explore consume <span aria-hidden="true">↗</span></a><a href="#remote" class="text-link">Jump to execute</a></div></div><div>{hero_diagram}</div></div><div class="cover-footer"><span>Censorship resistance / Open source / Privacy / Security</span><span>WireX &amp; reorg include unmerged work</span><span>Scroll freely · arrow keys to navigate</span></div></div></section>'''
+cover = f'''<section class="slide cover" id="overview" data-title="Overview"><div class="inner"><div class="section-top"><span class="section-number">01 / 11</span><span class="edition">execution-specs</span><span class="crops-badge" title="Censorship resistance, Open source, Privacy, Security">CROPS</span></div><div class="hero"><div><h1>Execution client<br><span>test routes</span></h1><p class="hero-lead">A discussion map of <strong>consume</strong> and <strong>execute</strong>.</p><p class="hero-sub">Which interface? Which environment?<br>How much client reuse?</p><div class="hero-links"><a href="#routes" class="primary-link">Explore consume <span aria-hidden="true">↗</span></a><a href="#remote" class="text-link">Jump to execute</a></div></div><div>{hero_diagram}</div></div><div class="cover-footer"><span>Censorship resistance / Open source / Privacy / Security</span><span>WireX &amp; reorg include unmerged work</span><span>Scroll freely · arrow keys to navigate</span></div></div></section>'''
 
 # Engine and startup import, shown as equal-sized routes.
 c = text(28,32,'ENGINE','svg-kicker','start') + text(28,174,'RLP','svg-kicker','start')
@@ -102,6 +102,34 @@ routes = section('routes','02','Engine API and startup import',
           + source('docs/running_tests/test_formats/blockchain_test_engine_x.md',1)),
     'consume engine / enginex / rlp')
 
+# Producer-side checks use the existing Engine fixture corpus.
+c = text(28,30,'SAME FIXTURES, CLIENT-BUILT PAYLOADS','svg-kicker','start')
+c += box(20,96,220,85,'Engine fixture','inputs + expected payload','violet')
+c += box(475,96,240,85,'Client under test','block production','violet')
+c += box(820,96,200,85,'Compare','built vs expected','mint')
+c += edge('M240 138 H462','violet')
+c += text(357,111,'testing_buildBlockV1','edge-label')
+c += text(357,163,'attributes + transactions','node-sub')
+c += edge('M715 138 H807','mint') + text(761,119,'built','edge-label')
+c += edge('M130 96 V55 H920 V83','violet',True)
+c += text(551,45,'Fixture expectation','edge-label')
+c += edge('M130 181 V235 H595 V194','violet')
+c += text(362,219,'Engine API imports fixture block','edge-label')
+c += text(427,291,'fixture chain','node-sub')
+c += text(514,291,'G','chain-label') + edge('M538 283 H575','violet')
+c += text(601,291,'T₁','chain-label') + edge('M626 283 H661','violet')
+c += text(690,291,'…','chain-label') + edge('M714 283 H749','violet')
+c += text(777,291,'Tₙ','chain-label')
+block_building = section('build-block','03','Build-block: producer-side coverage',
+    'The same Engine fixtures ask the client to construct the expected payload.',
+    svg('Engine fixture inputs reach the client through testing_buildBlockV1. The constructed payload is compared with the fixture expectation. The simulator imports the fixture block through Engine API to advance the chain from genesis G through T1 to Tn.',c,310)
+    + '<div class="fact-row"><p><strong>Same fixture corpus</strong><br><code>blockchain_test_engine</code></p><p><strong class="violet-text">Client support</strong><br>Opt-in testing RPC method.</p><p><strong>Standard architecture</strong><br>Fresh client per test. Valid payloads.</p></div>',
+    notes('<p><strong>Complement to consume engine:</strong> consume engine checks acceptance or rejection of supplied payloads. Build-block checks whether the client constructs the expected payload from a supplied parent, payload attributes, transactions and extra data. It uses the existing <code>blockchain_test_engine</code> format and the Hive suite <code>eels/build-block</code>.</p><p><code>testing_buildBlockV1</code> is a non-standard method in the testing RPC namespace and requires client support. The simulator compares payload fields against the fixture, including execution requests for V4+ payloads. Gas limit is checked against the permitted range rather than matched exactly. Block hash is excluded from exact comparison because the chosen gas limit can change it.</p><p>Only valid payloads are built. After comparison, the simulator imports the fixture block through <code>engine_newPayload</code> and advances forkchoice, preserving the expected parent for the next build. Transactions are explicitly supplied, so this checks block assembly and execution rather than live mempool selection. A fresh Hive client runs each test; this simulator does not use shared-genesis reuse.</p>',
+          source('docs/running_tests/running.md',203)
+          + source('packages/testing/src/execution_testing/cli/pytest_commands/plugins/consume/simulators/build_block/conftest.py',18)
+          + source('packages/testing/src/execution_testing/cli/pytest_commands/plugins/consume/simulators/simulator_logic/test_via_build.py',211)),
+    'build-block · eels/build-block')
+
 # X architecture: independent branches, never imply fixture chains continue each other.
 c = text(28,32,'STANDARD','svg-kicker','start') + text(578,32,'X ARCHITECTURE','svg-kicker','start')
 for i,y in enumerate([55,130,205]):
@@ -114,7 +142,7 @@ for i,y in enumerate([55,130,205]):
     c += edge(f'M748 161 H782 V{y+31} H817','mint')
     c += box(830,y,165,62,f'G → Test {i+1}',tone='mint')
 c += text(784,284,'Independent chains rooted at the same genesis','node-sub')
-x = section('reuse','03','Shared genesis, fewer client starts',
+x = section('reuse','04','Shared genesis, fewer client starts',
     'Compatible fork, genesis settings and accounts share a genesis, so one boot runs many tests.',
     svg('Standard simulators start and stop a client for each test. X architecture runs independent fixture chains against one shared genesis client.',c,300)
     + '<div class="metrics"><div><strong>26,357</strong><span>Amsterdam EngineX fixtures</span></div><div><strong class="mint-text">996</strong><span>distinct pre-allocation groups</span></div><div><strong>26.5×</strong><span>fewer planned base starts per client</span></div></div>'
@@ -141,7 +169,7 @@ c += text(690,262,'…','chain-label') + edge('M714 254 H749','mint')
 c += text(777,262,'Tₙ','chain-label') + edge('M803 254 H839','violet',True)
 c += text(870,262,'S','chain-label')
 c += text(427,291,'fixture blocks over devp2p','node-sub') + text(923,291,'sync target','node-sub')
-wirex = section('wirex','05','WireX: the production peer path',
+wirex = section('wirex','06','WireX: the production peer path',
     'The mock serves missing ancestry over devp2p. The Engine API tells the client where to sync.',
     svg('WireX configures a deterministic mock peer, announces a target using Engine API, and checks that the client receives fixture ancestry over devp2p.',c,310)
     + '<div class="fact-row"><p><strong class="mint-text">In-protocol ingestion</strong><br>RLPx / eth, headers and block bodies.</p><p><strong>Broad input corpus</strong><br>Uses the existing EngineX fixture format.</p><p><strong class="violet-text">Planned RLP replacement</strong><br>Initially post-Merge. Shared client startup.</p></div>',
@@ -166,7 +194,7 @@ c += text(690,243,'…','chain-label') + edge('M714 235 H749','mint')
 c += text(777,243,'Tₙ','chain-label') + edge('M803 235 H839','violet',True)
 c += text(870,243,'S','chain-label')
 c += text(697,268,'Same genesis, independently selected client implementations','node-sub')
-sync = section('sync','06','Sync: client-to-client integration',
+sync = section('sync','07','Sync: client-to-client integration',
     'A real source serves a real target. WireX replaces the source with a deterministic mock.',
     svg('A sync fixture populates a source EL through Engine API. The simulator tells a second EL about a target head. The target downloads ancestry from the source over devp2p.',c,288)
     + '<div class="sync-summary"><div class="large-number">9<span>Amsterdam fixtures</span></div><div><strong>Dedicated format, selected tests</strong><p><code>blockchain_test_sync</code> comes from <code>verify_sync</code> marks.</p><p>RLP block-size limit: boundaries, transaction types, logs, withdrawals.</p></div></div>'
@@ -190,7 +218,7 @@ c += box(767,184,157,68,'B₂ / head',tone='mint') + '</g>'
 c += text(662,148,'Engine API: forkchoiceUpdated','edge-label')
 c += text(310,278,'A → B → A','chain-label')
 c += text(710,278,'assert after each transition','node-sub')
-reorg = section('reorg','07','Reorg: state across branch changes',
+reorg = section('reorg','08','Reorg: state across branch changes',
     'A block DAG and a script control delivery, forkchoice and assertions at each step.',
     svg('An illustrative block DAG branches at a shared fork point. Engine forkchoice changes which branch is canonical, and assertions check each transition.',c,292)
     + '<div class="reorg-controls"><div class="segmented" role="group" aria-label="Choose canonical branch"><button class="selected" data-head="a" aria-pressed="true">Head A</button><button data-head="b" aria-pressed="false">Head B</button></div><span id="head-status" role="status">A is canonical</span><span class="diagram-caption">Illustrative DAG</span></div>'
@@ -213,7 +241,7 @@ table = '<div class="table-wrap"><table><thead><tr><th>Route</th><th>Client entr
 for name,id,interface,fmt,lifecycle,count in rows:
     table += f'<tr><td><a href="#{id}">{name}</a></td><td>{interface}</td><td><code>{fmt}</code></td><td>{lifecycle}</td><td class="numeric">{count}</td></tr>'
 table += '</tbody></table></div>'
-scope = section('scope','08','Amsterdam: corpus and routes',
+scope = section('scope','09','Amsterdam: corpus and routes',
     'v21.0.0 fixture entries, filtered to fork = Amsterdam. The formats overlap.',
     table + '<div class="table-footnotes"><p>† WireX reuses EngineX inputs, with path-specific skips. * Multi-target fixtures need isolated clients.</p><p>Reorg is absent from this release. Counts describe fixture entries, not unique test ideas.</p></div>'
     + '<div class="scope-secondary"><span><strong>16,896</strong> state fixtures</span><span><strong>92</strong> transaction fixtures</span><span>Index generated 23 September 2026</span></div>',
@@ -235,7 +263,7 @@ for cx in [513,703,894]:
 c += text(704,247,'EL propagation + consensus-driven inclusion','node-sub')
 c += edge('M513 220 V285 H135 V243','gray',True)
 c += text(331,272,'RPC state assertions','edge-label')
-remote = section('remote','09','Execute remote: tests in the network',
+remote = section('remote','10','Execute remote: tests in the network',
     'The test submits transactions. A native EL / CL network includes them and advances the chain.',
     svg('Execute remote turns Python tests into funding, deployment and test transactions. JSON-RPC submits to an EL node in a real network, with EL peers and CL interaction. RPC reads assert the resulting state.',c,308)
     + '<div class="fact-row"><p><strong class="mint-text">Test source, no fixture JSON</strong><br>Pre-state becomes real setup transactions.</p><p><strong>Native interactions</strong><br>Mempool, block production, EL and CL.</p><p><strong>Test-state assertions</strong><br>Expected account and contract state.</p></div>',
@@ -254,7 +282,7 @@ c += edge('M656 137 H797','violet') + text(730,78,'engine_getBlobsV*','edge-labe
 c += box(810,90,199,94,'Blobs + proofs','check contents','violet')
 c += edge('M544 184 V236 H832','gray',True)
 c += text(646,222,'then wait for inclusion','edge-label') + text(884,244,'block','node-title')
-blobs = section('execute-hive','10','Execute blobs and the Hive harness',
+blobs = section('execute-hive','11','Execute blobs and the Hive harness',
     'Blob tests submit network-wrapped transactions, then verify blob retrieval through the Engine API.',
     svg('Blob tests send transactions and sidecars over JSON-RPC into the EL blob pool. The test calls engine_getBlobs to check blobs and proofs, then waits for inclusion.',c,263)
     + '<div class="execute-asides"><div><h3 class="mint-text">eels/execute-blobs</h3><p>Hive simulator using <code>execute hive<br>-m blob_transaction_test</code>.</p><p>Available / missing blobs, proofs and newer retrieval variants.</p></div><div><h3>execute hive</h3><p>Controlled single EL. The harness supplies the consensus role.</p><p>Useful for execute plumbing and regression checks, alongside client checks.</p></div></div>',
@@ -283,7 +311,7 @@ for client in bench['clients']:
     enginex_url = 'https://hive.ethpandaops.io/generic/results/' + client['enginex_run'] + '.json'
     benchmark_sources += f'<li>{client["name"]} <code>{client["version"]}</code> · <a href="{engine_url}" target="_blank" rel="noreferrer">Engine result</a> · <a href="{enginex_url}" target="_blank" rel="noreferrer">EngineX result</a></li>'
 chart += '</figure>'
-timings = section('timings','04','Engine vs EngineX: measured time',
+timings = section('timings','05','Engine vs EngineX: measured time',
     'Paris–Osaka + transitions. v20.0.1. 54,438 cases. Four workers. July 2026.',
     chart + '<p class="benchmark-caption">Each pair uses the same client image. Bars normalize to that client’s Engine time.</p><p class="callout">Shared genesis turns hours of client starts into minutes of test execution.</p>',
     notes('<p>Measured daily Hive suite wall-clock spans from July 16–17, 2026, recovered from the saved July 19 dashboard analysis. These are historical runs, not a new benchmark or today’s latest dashboard result.</p><p>Each pair matches host, fixture release, test count, worker count, check-time limit and client image. Timing includes extraction and simulator/client startup, and excludes Docker image builds. The suite covers Paris through Osaka and transitions, including 23 BPO transition cases, but excludes standalone BPO fork suites.</p><p>Nimbus is excluded because cascade failures distort its duration. Erigon and Besu are excluded because their paired images differ, with Besu also using an older fixture release. This is observed suite acceleration, not a controlled repeated benchmark. Exact seconds, versions and public result IDs are preserved in <code>timings.json</code>.</p>', benchmark_sources),
@@ -338,7 +366,7 @@ script = r'''
     const containing = sections.findIndex(s => { const r = s.getBoundingClientRect(); return r.top <= target && r.bottom > target; });
     if (containing >= 0) current = containing;
     links.forEach(a => { const active = a.hash === '#'+sections[current].id; a.classList.toggle('active',active); if(active)a.setAttribute('aria-current','location');else a.removeAttribute('aria-current'); });
-    counter.textContent = String(current+1).padStart(2,'0')+' / 10';
+    counter.textContent = String(current+1).padStart(2,'0')+' / '+sections.length;
     progress.style.width = ((current+1)/sections.length*100)+'%';
   }
   function go(index) { sections[Math.max(0,Math.min(sections.length-1,index))].scrollIntoView({behavior:reduced?'instant':'smooth',block:'start'}); }
@@ -372,15 +400,15 @@ script = r'''
 })();
 '''
 
-nav = [('overview','Overview'),('routes','Engine / RLP'),('reuse','Reuse'),('timings','Timings'),('wirex','WireX'),('sync','Sync'),('reorg','Reorg'),('scope','Corpus'),('remote','Remote'),('execute-hive','Blobs / Hive')]
+nav = [('overview','Overview'),('routes','Engine / RLP'),('build-block','Build'),('reuse','Reuse'),('timings','Timings'),('wirex','WireX'),('sync','Sync'),('reorg','Reorg'),('scope','Corpus'),('remote','Remote'),('execute-hive','Blobs / Hive')]
 markers = ''.join(f'<marker id="{name}-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 Z" fill="{color}"/></marker>' for name,color in [('gray','#7a877d'),('mint','#b4f65e'),('violet','#b4bfd6'),('amber','#e6b06e')])
-html = '''<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="A visual discussion map of execution-specs consume and execute testing routes."><title>Execution client test routes</title><style>'''+style+'''</style></head><body><div class="progress" aria-hidden="true"></div><svg width="0" height="0" aria-hidden="true" style="position:absolute"><defs>'''+markers+'''</defs></svg><header><a class="brand" href="#overview">EELS <span>/ test routes</span></a><nav aria-label="Topics">'''+''.join(f'<a href="#{id}">{label}</a>' for id,label in nav)+'''</nav><div class="header-tools"><span class="page-count">01 / 10</span><button data-action="prev" aria-label="Previous topic">‹</button><button data-action="next" aria-label="Next topic">›</button><button data-action="help" aria-label="Keyboard shortcuts">?</button></div></header><main>'''+''.join([cover,routes,x,timings,wirex,sync,reorg,scope,remote,blobs])+'''</main><dialog id="help" aria-labelledby="help-title"><h3 id="help-title">Presentation controls</h3><dl><dt>← / →</dt><dd>Previous / next topic</dd><dt>PgUp / PgDn</dt><dd>Previous / next topic</dd><dt>Home / End</dt><dd>First / last topic</dd><dt>N</dt><dd>Toggle current topic’s notes</dd><dt>F</dt><dd>Toggle fullscreen</dd><dt>?</dt><dd>Show these controls</dd></dl><button>Close</button></dialog><script>'''+script+'''</script></body></html>'''
+html = '''<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="A visual discussion map of execution-specs consume and execute testing routes."><title>Execution client test routes</title><style>'''+style+'''</style></head><body><div class="progress" aria-hidden="true"></div><svg width="0" height="0" aria-hidden="true" style="position:absolute"><defs>'''+markers+'''</defs></svg><header><a class="brand" href="#overview">EELS <span>/ test routes</span></a><nav aria-label="Topics">'''+''.join(f'<a href="#{id}">{label}</a>' for id,label in nav)+'''</nav><div class="header-tools"><span class="page-count">01 / 11</span><button data-action="prev" aria-label="Previous topic">‹</button><button data-action="next" aria-label="Next topic">›</button><button data-action="help" aria-label="Keyboard shortcuts">?</button></div></header><main>'''+''.join([cover,routes,block_building,x,timings,wirex,sync,reorg,scope,remote,blobs])+'''</main><dialog id="help" aria-labelledby="help-title"><h3 id="help-title">Presentation controls</h3><dl><dt>← / →</dt><dd>Previous / next topic</dd><dt>PgUp / PgDn</dt><dd>Previous / next topic</dd><dt>Home / End</dt><dd>First / last topic</dd><dt>N</dt><dd>Toggle current topic’s notes</dd><dt>F</dt><dd>Toggle fullscreen</dd><dt>?</dt><dd>Show these controls</dd></dl><button>Close</button></dialog><script>'''+script+'''</script></body></html>'''
 (OUT / 'index.html').write_text(html)
 (OUT / 'README.md').write_text('''# Execution client test routes
 
 Open `index.html` directly in a browser. It is self-contained and works offline. No service, build step, external font or package installation is required.
 
-Ten scrollable topics cover Engine/RLP routes, shared-genesis reuse, measured timings, WireX, sync, reorg, Amsterdam fixture counts, execute remote, and execute-blobs/Hive. Arrow keys or Page Up/Down move between topics. `N` toggles the current topic’s discussion notes. `F` toggles fullscreen. Click Head A / Head B on the reorg diagram to change the illustrative canonical branch.
+Eleven scrollable topics cover Engine/RLP routes, fixture-driven block production, shared-genesis reuse, measured timings, WireX, sync, reorg, Amsterdam fixture counts, execute remote, and execute-blobs/Hive. Arrow keys or Page Up/Down move between topics. `N` toggles the current topic’s discussion notes. `F` toggles fullscreen. Click Head A / Head B on the reorg diagram to change the illustrative canonical branch.
 
 The default layouts target a laptop viewport of 1280×720 or larger. Use browser fullscreen for presentation. A print stylesheet is included for landscape output.
 

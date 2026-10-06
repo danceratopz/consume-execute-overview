@@ -2,7 +2,7 @@
 
 Open `index.html` directly in a browser. It is self-contained and works offline. No service, build step, external font or package installation is required.
 
-Ten scrollable topics cover Engine/RLP routes, shared-genesis reuse, measured timings, WireX, sync, reorg, Amsterdam fixture counts, execute remote, and execute-blobs/Hive. Arrow keys or Page Up/Down move between topics. `N` toggles the current topic’s discussion notes. `F` toggles fullscreen. Click Head A / Head B on the reorg diagram to change the illustrative canonical branch.
+Eleven scrollable topics cover Engine/RLP routes, fixture-driven block production, shared-genesis reuse, measured timings, WireX, sync, reorg, Amsterdam fixture counts, execute remote, and execute-blobs/Hive. Arrow keys or Page Up/Down move between topics. `N` toggles the current topic’s discussion notes. `F` toggles fullscreen. Click Head A / Head B on the reorg diagram to change the illustrative canonical branch.
 
 The default layouts target a laptop viewport of 1280×720 or larger. Use browser fullscreen for presentation. A print stylesheet is included for landscape output.
 
